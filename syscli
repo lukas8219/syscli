@@ -1,30 +1,54 @@
 #!/bin/bash
 
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CSV_FILE="$SCRIPT_DIR/dataset"
+
+# Function to show help
+show_help() {
+    echo "Usage: $0 [--resource <resource>] [--type <type>] [--help]"
+    echo ""
+    echo "Options:"
+    echo "  --resource, -r <resource>  Filter by resource"
+    echo "  --type, -t <type>          Filter by type"
+    echo "  --help, -h                 Show this help message"
+    echo ""
+
+    if [[ -f "$CSV_FILE" ]]; then
+        echo "Available resources:"
+        tail -n +2 "$CSV_FILE" | cut -d',' -f1 | sort -u | sed 's/^/  - /'
+        echo ""
+        echo "Available types:"
+        tail -n +2 "$CSV_FILE" | cut -d',' -f2 | sort -u | sed 's/^/  - /'
+    fi
+
+    exit 0
+}
+
 # Parse command line arguments
 RESOURCE=""
 TYPE=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --resource)
+        --resource|-r)
             RESOURCE="$2"
             shift 2
             ;;
-        --type)
+        --type|-t)
             TYPE="$2"
             shift 2
             ;;
+        --help|-h)
+            show_help
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--resource <resource>] [--type <type>]"
+            echo "Usage: $0 [--resource <resource>] [--type <type>] [--help]"
             exit 1
             ;;
     esac
 done
-
-# Get the directory where the script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CSV_FILE="$SCRIPT_DIR/dataset"
 
 # Check if dataset file exists
 if [[ ! -f "$CSV_FILE" ]]; then
